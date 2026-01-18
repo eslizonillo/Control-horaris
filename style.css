@@ -1,0 +1,401 @@
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e24;
+    --primary-color: #4ade80;
+    /* Green */
+    --error-color: #f87171;
+    /* Red */
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent: #3b82f6;
+    /* Blue */
+    --border-color: #333;
+    --input-bg: #2d2d35;
+    --font-family: 'Outfit', sans-serif;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 80px;
+    /* Space for fixed footer if needed, or just bottom spacing */
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Controls */
+.controls {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--card-bg);
+}
+
+.btn-outline-danger {
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: rgba(248, 113, 113, 0.1);
+}
+
+.btn-outline-primary {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn-outline-primary:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.controls label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+select {
+    appearance: none;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 32px 8px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+select:focus {
+    border-color: var(--accent);
+}
+
+.chevron {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-secondary);
+    width: 16px;
+    height: 16px;
+}
+
+/* Days List */
+.days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.day-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.day-card:hover {
+    border-color: #444;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.day-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--accent);
+}
+
+.day-total {
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.time-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-group label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+input[type="time"] {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+input[type="time"]:focus {
+    border-color: var(--primary-color);
+}
+
+.status-message {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: right;
+    min-height: 1.2em;
+    font-style: italic;
+}
+
+/* Footer Summary */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(30, 30, 36, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-color);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+}
+
+/* Day Card Header */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.holiday-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.holiday-toggle input {
+    accent-color: var(--accent);
+}
+
+/* Footer Summary Grid */
+.total-summary-grid {
+    width: 100%;
+    max-width: 600px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.summary-item .label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.summary-item .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+.balance.positive {
+    color: var(--primary-color);
+}
+
+.balance.negative {
+    color: var(--error-color);
+}
+
+.target-display {
+    text-align: center;
+    /* Override previous right align */
+}
+
+/* Hide legacy elements if any remain */
+.total-summary {
+    display: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.day-card {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.day-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.day-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.day-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.day-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.day-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.day-card:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.day-card:nth-child(7) {
+    animation-delay: 0.35s;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.7rem;
+    }
+
+    .day-name {
+        font-size: 1rem;
+    }
+
+    .day-total {
+        font-size: 1rem;
+    }
+}
