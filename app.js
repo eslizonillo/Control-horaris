@@ -36,10 +36,10 @@ function setupEventListeners() {
     });
 
     // Actions
-    // Actions
     document.getElementById('btn-reset').addEventListener('click', resetWeek);
     document.getElementById('btn-export-pdf').addEventListener('click', exportPDF);
     document.getElementById('btn-export-excel').addEventListener('click', exportExcel);
+    document.getElementById('btn-export-drive').addEventListener('click', copyForDrive);
 
     // Week Info Listeners
     ['week-number', 'week-start', 'week-end'].forEach(id => {
@@ -92,12 +92,12 @@ function calculateDaily(day) {
         // Rule: If >= 6h 15m (375 mins), deduct 15 mins
         if (duration >= 375) {
             effectiveDuration -= 15;
-            message = 'Descanso (-15m)';
+            message = 'Descans (-15m)';
         }
     }
 
     if (isHoliday) {
-        message = message ? `${message} | Festivo` : 'Festivo';
+        message = message ? `${message} | Festiu` : 'Festiu';
     }
 
     // UI Updates
@@ -124,10 +124,6 @@ function calculateWeekly() {
         const dayData = state.times[day] || {};
         const isHoliday = document.getElementById(`holiday-${day}`).checked;
 
-        // Get worked minutes from simple calculation (avoiding circular dependency if possible, but reusing logic is fine)
-        // We need the ACTUAL worked minutes here.
-        // Let's grab the value calculated in UI or re-calc. 
-        // Re-calc is safer.
         let dayMinutes = 0;
         const start = document.getElementById(`start-${day}`).value;
         const end = document.getElementById(`end-${day}`).value;
@@ -150,8 +146,6 @@ function calculateWeekly() {
         if (isHoliday && day !== 'Sun') {
             holidayCount++;
         }
-
-        // totalTargetMinutes accumulation removed, calculated after loop
     });
 
     // Calculate Target based on Holiday Count
@@ -168,11 +162,9 @@ function calculateWeekly() {
     document.getElementById('holiday-total').textContent = formatMinutes(totalHolidayMinutes);
 
     // Target
-    document.getElementById('target-display').textContent = `Meta: ${targetHours}h`;
+    document.getElementById('target-display').textContent = `Objectiu: ${targetHours}h`;
 
     // Balance
-    // Balance is based on NON-HOLIDAY hours vs TARGET
-    // We assume target for holiday is 0, so we should compare (Total - HolidayHours) vs Target.
     const regularMinutes = totalMinutes - totalHolidayMinutes;
     const balanceMinutes = regularMinutes - totalTargetMinutes;
     const balanceEl = document.getElementById('balance-display');
@@ -203,7 +195,7 @@ function formatDateDisplay(dateStr) {
 
 
 function resetWeek() {
-    if (!confirm('¿Estás seguro de que quieres borrar todos los datos de esta semana?')) return;
+    if (!confirm('Estàs segur que vols esborrar totes les dades d\'aquesta setmana?')) return;
 
     // Clear state
     state.times = {};
@@ -220,12 +212,9 @@ function resetWeek() {
 function getDataForExport() {
     const data = [];
     const dayNames = {
-        'Mon': 'Lunes', 'Tue': 'Martes', 'Wed': 'Miércoles',
-        'Thu': 'Jueves', 'Fri': 'Viernes', 'Sat': 'Sábado', 'Sun': 'Domingo'
+        'Mon': 'Dilluns', 'Tue': 'Dimarts', 'Wed': 'Dimecres',
+        'Thu': 'Dijous', 'Fri': 'Divendres', 'Sat': 'Dissabte', 'Sun': 'Diumenge'
     };
-
-    // Header
-    data.push(["Dia", "Entrada", "Salida", "Total", "Festivo", "Notas"]);
 
     days.forEach(day => {
         const times = state.times[day] || {};
@@ -236,20 +225,18 @@ function getDataForExport() {
         let note = '';
         let totalText = document.getElementById(`total-${day}`).textContent;
 
-        // Re-check for break note
         if (start && end) {
             const s = timeToMinutes(start);
             const e = timeToMinutes(end);
             let d = e - s;
             if (d < 0) d += 24 * 60;
-            // Fix: Apply break deduction to holidays too (removed !isHoliday check)
             if (d >= 375) {
-                note = 'Descanso (-15m)';
+                note = 'Descans (-15m)';
             }
         }
 
         data.push([
-            dayNames[day], // Translate day name
+            dayNames[day],
             start,
             end,
             totalText,
@@ -266,23 +253,20 @@ function exportPDF() {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text("Reporte de Horas", 14, 20);
+    doc.text("Report d'Hores", 14, 20);
 
     doc.setFontSize(11);
     const weekNum = state.weekInfo.number || '-';
     const weekStart = formatDateDisplay(state.weekInfo.start);
     const weekEnd = formatDateDisplay(state.weekInfo.end);
 
-    doc.text(`Semana: ${weekNum}`, 14, 30);
+    doc.text(`Setmana: ${weekNum}`, 14, 30);
     doc.text(`Del: ${weekStart} al ${weekEnd}`, 14, 36);
 
-    const data = getDataForExport();
-    // transform data for autoTable (obj or array)
-    // autoTable expects body as array of arrays
-
-    // Extract head and body
-    const head = [data[0]];
-    const body = data.slice(1);
+    const rawData = getDataForExport();
+    // Prepend Header
+    const head = [["Dia", "Entrada", "Sortida", "Total", "Festiu", "Notes"]];
+    const body = rawData;
 
     doc.autoTable({
         startY: 45,
@@ -301,15 +285,18 @@ function exportPDF() {
 
     doc.setFontSize(11);
     doc.text(`${target}`, 14, finalY);
-    doc.text(`Total Semanal: ${total}`, 14, finalY + 6);
-    doc.text(`Balance: ${balance}`, 14, finalY + 12);
-    doc.text(`Horas en Festivos: ${holiday}`, 14, finalY + 18);
+    doc.text(`Total Setmanal: ${total}`, 14, finalY + 6);
+    doc.text(`Balanç: ${balance}`, 14, finalY + 12);
+    doc.text(`Hores en Festius: ${holiday}`, 14, finalY + 18);
 
-    doc.save("control_horario.pdf");
+    doc.save("control_horari.pdf");
 }
 
 function exportExcel() {
-    const data = getDataForExport();
+    const rawData = getDataForExport();
+
+    // Add Headers
+    const data = [["Dia", "Entrada", "Sortida", "Total", "Festiu", "Notes"], ...rawData];
 
     // Add Week Info at the top
     const weekNum = state.weekInfo.number || '-';
@@ -318,9 +305,9 @@ function exportExcel() {
 
     // Insert at beginning
     data.unshift([]); // spacer
-    data.unshift(["Hasta", weekEnd]);
-    data.unshift(["Desde", weekStart]);
-    data.unshift(["Semana", weekNum]);
+    data.unshift(["Fins", weekEnd]);
+    data.unshift(["Des de", weekStart]);
+    data.unshift(["Setmana", weekNum]);
 
     // Append totals
     const total = document.getElementById('weekly-total').textContent;
@@ -329,16 +316,67 @@ function exportExcel() {
     const holiday = document.getElementById('holiday-total').textContent;
 
     data.push([]);
-    data.push(["Resumen"]);
+    data.push(["Resum"]);
     data.push([target]);
-    data.push(["Total Semanal", total]);
-    data.push(["Balance", balance]);
-    data.push(["Horas en Festivos", holiday]);
+    data.push(["Total Setmanal", total]);
+    data.push(["Balanç", balance]);
+    data.push(["Hores en Festius", holiday]);
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, "Horas");
-    XLSX.writeFile(wb, "control_horario.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Hores");
+    XLSX.writeFile(wb, "control_horari.xlsx");
+}
+
+async function copyForDrive() {
+    const weekNum = state.weekInfo.number || 'Sense número';
+    const weekStart = formatDateDisplay(state.weekInfo.start);
+
+    // Prepare Data
+    const rawData = getDataForExport();
+
+    const total = document.getElementById('weekly-total').textContent;
+    const target = document.getElementById('target-display').textContent;
+    const balance = document.getElementById('balance-display').textContent;
+    const holiday = document.getElementById('holiday-total').textContent;
+
+    // Use a format that resembles Excel rows (Tab separated)
+    const rows = [
+        ["Setmana", weekNum, "Inici", weekStart, "", ""],
+        ["Dia", "Entrada", "Sortida", "Total", "Festiu", "Notes"],
+        ...rawData,
+        [],
+        ["Resum", "", "", "", "", ""],
+        ["Objectiu", target, "", "", "", ""],
+        ["Total", total, "", "", "", ""],
+        ["Balanç", balance, "", "", "", ""],
+        ["Festius", holiday, "", "", "", ""]
+    ];
+
+    // Convert array of arrays to TSV string
+    const tsv = rows.map(row => row.join('\t')).join('\n');
+
+    const btn = document.getElementById('btn-export-drive');
+    const originalText = btn.innerHTML;
+
+    try {
+        await navigator.clipboard.writeText(tsv);
+
+        btn.innerHTML = 'Copiat!';
+        // Visual feedback
+        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+        alert("Dades exportades al porta-retalls.\n\nObre el teu full de Google Sheets i prem Ctrl+V per enganxar.");
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = ''; // revert to class style
+        }, 3000);
+
+    } catch (e) {
+        console.error(e);
+        alert("No s'ha pogut copiar al porta-retalls. Permís denegat.");
+    }
 }
 
 // Persistence
